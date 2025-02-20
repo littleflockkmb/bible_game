@@ -14,7 +14,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'sql12.freesqldatabase.com',
     user: 'sql12763765',
-    password: 'ZdwJzc6RV1',
+    password: '@LITTLEflock-123',
     database: 'sql12763765'
 });
 
