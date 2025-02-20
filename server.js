@@ -1,18 +1,18 @@
 const express = require('express');
 const mysql = require('mysql2'); 
 const cors = require('cors');
-const path = require('path');  // ✅ Import 'path' to serve static files
+const path = require('path');  
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ✅ Serve Frontend (Static Files)
-app.use(express.static(path.join(__dirname, 'public')));
+// ✅ Serve static files from the default project folder
+app.use(express.static(__dirname));
 
 // ✅ Serve index.html for the root route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html')); // ✅ Serve index.html from project root
 });
 
 // ✅ Database Connection
