@@ -1,21 +1,19 @@
-const server = require('http').createServer(app);
-
-server.keepAliveTimeout = 120000; // 120 seconds
-server.headersTimeout = 120000; // 120 seconds
-
 const express = require('express');
-const mysql = require('mysql');
+const mysql = require('mysql2'); // Use 'mysql2' for better stability
 const cors = require('cors');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Fix: Create server AFTER defining 'app'
+const server = require('http').createServer(app);
+
 const db = mysql.createConnection({
-    host: 'sql12.freesqldatabase.com',
-    user: 'sql12763765',
-    password: '@LITTLEflock-123',
-    database: 'sql12763765'
+    host: 'sql12.freesqldatabase.com',  // Your database host
+    user: 'sql12763765',               // Your database username
+    password: '@LITTLEflock-123',// Your database password
+    database: 'sql12763765'            // Your database name
 });
 
 db.connect(err => {
@@ -26,8 +24,7 @@ db.connect(err => {
     console.log("✅ Connected to MySQL database");
 });
 
-
-
+// Route to Save Score
 app.post('/save-score', (req, res) => {
     const { username, score } = req.body;
     if (!username || score === undefined) {
@@ -39,6 +36,7 @@ app.post('/save-score', (req, res) => {
     });
 });
 
+// Route to Get Leaderboard
 app.get('/leaderboard', (req, res) => {
     db.query('SELECT username, score FROM scores ORDER BY score DESC LIMIT 10', (err, results) => {
         if (err) return res.status(500).json({ error: 'Database error' });
@@ -46,8 +44,11 @@ app.get('/leaderboard', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 10000; // Render uses dynamic ports
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Fix: Start server with proper port and timeouts
+const PORT = process.env.PORT || 10000;
+server.keepAliveTimeout = 120000;
+server.headersTimeout = 120000;
 
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Server running on port ${PORT}`);
+});
