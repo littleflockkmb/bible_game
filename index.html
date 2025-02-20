@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>பைபிள் வசனம் - சரியான விடையை தேர்வு செய்க</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; padding: 20px; }
+        #game-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px gray; max-width: 600px; margin: auto; display: none; }
+        .choice { display: block; margin: 10px auto; padding: 10px; width: 80%; font-size: 18px; cursor: pointer; border-radius: 5px; border: 1px solid #333; background: #fff; }
+        .choice:hover { background: #ddd; }
+        #leaderboard { margin-top: 20px; padding: 10px; background: white; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div id="user-input">
+        <h2>பயனர் பெயரை உள்ளிடவும்</h2>
+        <input type="text" id="username" placeholder="பெயர்" />
+        <button onclick="startGame()">ஆரம்பிக்க</button>
+    </div>
+
+    <div id="game-container">
+        <h2>பைபிள் வசனம் - சரியான விடையை தேர்வு செய்க</h2>
+        <p id="verse-display"></p>
+        <button class="choice" onclick="checkAnswer(this)"></button>
+        <button class="choice" onclick="checkAnswer(this)"></button>
+        <button class="choice" onclick="checkAnswer(this)"></button>
+        <p id="result"></p>
+        <button onclick="nextQuestion()">அடுத்தது</button>
+        <p id="score-display"></p>
+    </div>
+
+    <div id="leaderboard">
+        <h3>முன்னணி வீரர்கள்</h3>
+        <ul id="leaderboard-list"></ul>
+    </div>
+
+    <script>
+        const bibleVerses = [
+            { verse: "ஆதியாகமம் 1:1 - 'ஆரம்பத்தில் _____ வானத்தையும் பூமியையும் ஸிருஷ்டித்தார்.'", choices: ["மோசே", "தேவன்", "ஆதாம்"], correct: "தேவன்" },
+            { verse: "யோவான் 3:16 - 'ஏனெனில் தேவன் தம்முடைய _____ அளவில்லாத அன்பை காட்டினார்.'", choices: ["கண்கள்", "குமாரனை", "மரியாதை"], correct: "குமாரனை" }
+        ];
+        
+        let currentQuestion = 0;
+        let score = 0;
+        let username = "";
+
+        function startGame() {
+            username = document.getElementById("username").value;
+            if (!username) {
+                alert("பயனர் பெயரை உள்ளிடவும்");
+                return;
+            }
+            document.getElementById("user-input").style.display = "none";
+            document.getElementById("game-container").style.display = "block";
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = bibleVerses[currentQuestion];
+            document.getElementById("verse-display").textContent = q.verse;
+            const choices = document.getElementsByClassName("choice");
+            for (let i = 0; i < choices.length; i++) {
+                choices[i].textContent = q.choices[i];
+                choices[i].style.backgroundColor = "white";
+            }
+            document.getElementById("result").textContent = "";
+        }
+
+        function checkAnswer(button) {
+            if (button.textContent === bibleVerses[currentQuestion].correct) {
+                score++;
+                button.style.backgroundColor = "green";
+            } else {
+                button.style.backgroundColor = "red";
+            }
+            document.getElementById("result").textContent = "சரியான விடை: " + bibleVerses[currentQuestion].correct;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < bibleVerses.length) {
+                loadQuestion();
+            } else {
+                document.getElementById("game-container").innerHTML = `<h2>வாழ்த்துக்கள்! <br> நீங்கள் ${score} / ${bibleVerses.length} புள்ளிகள் பெற்றுள்ளீர்கள்!</h2>`;
+                saveScore();
+            }
+        }
+
+        function saveScore() {
+            fetch("http://localhost:3000/save-score", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, score })
+            }).then(() => {
+                loadLeaderboard();
+            });
+        }
+
+        function loadLeaderboard() {
+            fetch("http://localhost:3000/leaderboard")
+                .then(res => res.json())
+                .then(data => {
+                    const leaderboard = document.getElementById("leaderboard-list");
+                    leaderboard.innerHTML = "";
+                    data.forEach(entry => {
+                        leaderboard.innerHTML += `<li>${entry.username}: ${entry.score}</li>`;
+                    });
+                });
+        }
+
+        window.onload = loadLeaderboard;
+    </script>
+</body>
+</html>
