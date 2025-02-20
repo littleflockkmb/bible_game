@@ -20,11 +20,12 @@ const db = mysql.createConnection({
 
 db.connect(err => {
     if (err) {
-        console.error('Database connection failed:', err);
-    } else {
-        console.log('✅ Connected to MySQL database');
+        console.error("❌ Database connection failed:", err);
+        return;
     }
+    console.log("✅ Connected to MySQL database");
 });
+
 
 
 app.post('/save-score', (req, res) => {
