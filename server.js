@@ -23,6 +23,9 @@ db.connect(err => {
     }
     console.log("✅ Connected to MySQL database");
 });
+app.get('/', (req, res) => {
+    res.send("✅ Bible Game API is Running! Use /leaderboard or /save-score");
+});
 
 // Route to Save Score
 app.post('/save-score', (req, res) => {
