@@ -1,19 +1,26 @@
 const express = require('express');
-const mysql = require('mysql2'); // Use 'mysql2' for better stability
+const mysql = require('mysql2'); 
 const cors = require('cors');
+const path = require('path');  // ✅ Import 'path' to serve static files
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Fix: Create server AFTER defining 'app'
-const server = require('http').createServer(app);
+// ✅ Serve Frontend (Static Files)
+app.use(express.static(path.join(__dirname, 'public')));
 
+// ✅ Serve index.html for the root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ✅ Database Connection
 const db = mysql.createConnection({
-    host: 'sql12.freesqldatabase.com',  // Your database host
-    user: 'sql12763765',               // Your database username
-    password: '@LITTLEflock-123',// Your database password
-    database: 'sql12763765'            // Your database name
+    host: 'sql12.freesqldatabase.com',
+    user: 'sql12763765',
+    password: '@LITTLEflock-123',
+    database: 'sql12763765'
 });
 
 db.connect(err => {
@@ -23,11 +30,8 @@ db.connect(err => {
     }
     console.log("✅ Connected to MySQL database");
 });
-app.get('/', (req, res) => {
-    res.send("✅ Bible Game API is Running! Use /leaderboard or /save-score");
-});
 
-// Route to Save Score
+// ✅ Save Score
 app.post('/save-score', (req, res) => {
     const { username, score } = req.body;
     if (!username || score === undefined) {
@@ -39,7 +43,7 @@ app.post('/save-score', (req, res) => {
     });
 });
 
-// Route to Get Leaderboard
+// ✅ Get Leaderboard
 app.get('/leaderboard', (req, res) => {
     db.query('SELECT username, score FROM scores ORDER BY score DESC LIMIT 10', (err, results) => {
         if (err) return res.status(500).json({ error: 'Database error' });
@@ -47,11 +51,8 @@ app.get('/leaderboard', (req, res) => {
     });
 });
 
-// Fix: Start server with proper port and timeouts
+// ✅ Start Server
 const PORT = process.env.PORT || 10000;
-server.keepAliveTimeout = 120000;
-server.headersTimeout = 120000;
-
-server.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Server running on port ${PORT}`);
 });
