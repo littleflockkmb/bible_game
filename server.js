@@ -1,3 +1,8 @@
+const server = require('http').createServer(app);
+
+server.keepAliveTimeout = 120000; // 120 seconds
+server.headersTimeout = 120000; // 120 seconds
+
 const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
@@ -39,4 +44,8 @@ app.get('/leaderboard', (req, res) => {
     });
 });
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+const PORT = process.env.PORT || 10000; // Render uses dynamic ports
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
