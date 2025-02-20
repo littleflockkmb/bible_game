@@ -88,7 +88,7 @@
         }
 
         function saveScore() {
-            fetch("http://localhost:3000/save-score", {
+            fetch("https://bible-game.onrender.com/save-score", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, score })
@@ -98,7 +98,7 @@
         }
 
         function loadLeaderboard() {
-            fetch("http://localhost:3000/leaderboard")
+            fetch("https://bible-game.onrender.com/leaderboard")
                 .then(res => res.json())
                 .then(data => {
                     const leaderboard = document.getElementById("leaderboard-list");
