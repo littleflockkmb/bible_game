@@ -12,7 +12,7 @@ app.use(express.static(__dirname));
 
 // ✅ Serve index.html for the root route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html')); // ✅ Serve index.html from project root
+    res.sendFile(path.join(__dirname, 'web.html')); // ✅ Serve index.html from project root
 });
 
 // ✅ Database Connection
