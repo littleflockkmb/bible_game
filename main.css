@@ -1,31 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
 body {
-    font-family: Arial, sans-serif;
-    background-color: #ffe4e1; /* Light pink background */
+  font-family: "Merriweather", serif;
+    background: #992215; /* Light pink background */
     margin: 0;
     padding: 0;
 }
 
 
-nav {
-    background-color: #f8bbd0; /* Slightly darker pink for the navigation bar */
-    padding: 10px 0;
-    text-align: center;
+.lfpf a{
+  color: #880e4f;
+  text-align: center;
+  text-decoration: none;
+  font-family:merriweather;
 }
-
-nav ul {
-    list-style: none;
-    padding: 0;
+.topnav{
+   background-color: #880e4f;
+   text-align: center;
 }
-
-nav ul li {
-    display: inline;
-    margin: 0 20px;
+.topnav a {
+   color: rgb(245, 230, 212);
+   text-decoration:;
+   font-family: 'playfair display';
+   padding: 14px, 16x;
+   text-align: center;
 }
-
-nav a {
-    text-decoration: none;
-    color: #880e4f; /* Darker pink for links */
-    font-weight: bold;
+.topnav a:hover {
+   color: rgb(253, 255, 109);
 }
 
 section {
