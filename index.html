@@ -106,13 +106,13 @@ nav a {
         <p id="verse-display"></p>
         <div id="choices-container"></div>
         <p id="result"></p>
-        <button onclick="nextQuestion()">அடுத்தது</button>
+        <button onclick="nextQuestion()">Next</button>
         <p id="score-display"></p>
     </div>
 
     <section  class="ms-2 me-2">
     <div id="leaderboard" class="mb-5">
-        <h3>முன்னணி வீரர்கள்</h3>
+        <h3>SCORE BOARD</h3>
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -245,7 +245,7 @@ nav a {
         function startGame() {
             username = document.getElementById("username").value;
             if (!username.trim()) {
-                alert("பயனர் பெயரை உள்ளிடவும்");
+                alert("please. Enter Your Name");
                 return;
             }
             document.getElementById("user-input").style.display = "none";
