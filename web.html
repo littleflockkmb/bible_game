@@ -29,12 +29,11 @@
         
         <h2> <p id="current-date"><span id="date"></span></p></h2>
         <hr>
-        <div id="verse-text">
+        <p id="display-text">Loading...</p>
             <!--- .tamil and english Verse will be displayed here -->
-        </div>
-        <button id="copy-button">Copy Verse</button>
+        
+        <button onclick="copyVerse()">Copy Verse</button>
        <!-- <button id="share-button">Share Verse</button> -->
-        <p id="verse-text"></p>
   <!-- Like button and counter -->
   <div class="like-btn-container">
     <button id="like-btn" class="like-btn">ஆமென்</button>
@@ -48,12 +47,11 @@
         
         <h2> <p id="current-date"><span id="date"></span></p></h2>
       <hr>
-        <div id="verse-text-eng">
-            <!-- Verse will be displayed here -->
-        </div>
-        <button id="copy-button1">Copy Verse</button>
-        <!---<button id="share-button1">Share Verse</button>-->
-        <p id="verse-text-eng"></p>
+        <p id="display-text-eng">Loading...</p>
+            <!--- .tamil and english Verse will be displayed here -->
+        
+        <button onclick="copyVerse1()">Copy Verse</button>
+       <!-- <button id="share-button">Share Verse</button> -->
   <!-- Like button and counter -->
   <div class="like-btn-container1">
     <button id="like-btn1" class="like-btn1">Amen</button>
@@ -235,6 +233,94 @@
      
      
        </script>
+
+     <script>
+        // Fetch the verse.html file
+ fetch("verse.html")
+ .then(response => response.text())
+ .then(data => {
+     // Create a temporary element to extract the verse
+     let tempDiv = document.createElement("div");
+     tempDiv.innerHTML = data;
+     
+     // Get the verse text by selecting the <p> tag with id "tam-verse"
+     let verseText = tempDiv.querySelector("#tam-verse").textContent;
+
+     // Display the verse in the paragraph with id "display-verse"
+     document.getElementById("display-text").textContent = verseText;
+ })
+ .catch(error => {
+     console.error("Error loading verse:", error);
+     document.getElementById("display-text").textContent = "Failed to load verse.";
+ });
+
+      
+        // Function to copy the verse text
+        function copyVerse() {
+            let verseText = document.getElementById("display-text").textContent;
+
+            // Create a temporary textarea to copy text
+            let tempInput = document.createElement("textarea");
+            tempInput.value = verseText;
+            document.body.appendChild(tempInput);
+
+            // Select and copy the text
+            tempInput.select();
+            document.execCommand("copy");
+
+            // Remove the temporary textarea
+            document.body.removeChild(tempInput);
+
+            // Show alert message
+            alert("Verse copied: " + verseText);
+        }
+
+       </script>
+
+<!--English verse displaying Script-->
+<script>
+  // Fetch the verse.html file
+fetch("verse.html")
+.then(response => response.text())
+.then(data => {
+// Create a temporary element to extract the verse
+let tempDiv = document.createElement("div");
+tempDiv.innerHTML = data;
+
+// Get the verse text by selecting the <p> tag with id "tam-verse"
+let verseText = tempDiv.querySelector("#eng-verse").textContent;
+
+// Display the verse in the paragraph with id "display-verse"
+document.getElementById("display-text-eng").textContent = verseText;
+})
+.catch(error => {
+console.error("Error loading verse:", error);
+document.getElementById("display-text-eng").textContent = "Failed to load verse.";
+});
+
+
+  // Function to copy the verse text
+  function copyVerse1() {
+      let verseText = document.getElementById("display-text-eng").textContent;
+
+      // Create a temporary textarea to copy text
+      let tempInput = document.createElement("textarea");
+      tempInput.value = verseText;
+      document.body.appendChild(tempInput);
+
+      // Select and copy the text
+      tempInput.select();
+      document.execCommand("copy");
+
+      // Remove the temporary textarea
+      document.body.removeChild(tempInput);
+
+      // Show alert message
+      alert("Verse copied: " + verseText);
+  }
+
+ </script>
+
 
 </body>
 </html>
