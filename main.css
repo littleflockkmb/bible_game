@@ -54,16 +54,14 @@ section {
     margin-bottom: 20px;
 }
 button {
-    background-color: #e91e63; /* Pink button color */
+    background-color: #880e4f; /* Pink button color */
     color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
     cursor: pointer;
 }
 
 button:hover {
-    background-color: #c2185b; /* Darker pink on hover */
+    background-color: #ffe2e2;
+    color: #000000; /* Darker pink on hover */
 }
 
 /* Paragraph container styles */
