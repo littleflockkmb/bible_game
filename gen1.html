@@ -333,7 +333,7 @@ button{
             currentQuestion++;
             loadQuestion();
         }function saveScore(username, score) {
-    fetch('http://your-server-ip:10000/save-score', {
+    fetch('https://bible-game.onrender.com/save-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, score, game: "game1" }) // ✅ Send correct game name
@@ -345,7 +345,7 @@ button{
 
 // ✅ Fetch and Display Leaderboard for game.html
 function loadLeaderboard() {
-    fetch('http://your-server-ip:10000/leaderboard?game=game1')
+    fetch('https://bible-game.onrender.com/leaderboard?game=game1')
         .then(response => response.json())
         .then(data => {
             const leaderboardBody = document.getElementById('leaderboard-body');
