@@ -37,7 +37,7 @@ app.post('/save-score', (req, res) => {
     if (!username || score === undefined) {
         return res.status(400).json({ error: 'Invalid data' });
     }
-    db.query('INSERT INTO scores (username, score) VALUES (?, ?)', [username, score], (err) => {
+    db.query('INSERT INTO Gen1_scores (username, score) VALUES (?, ?)', [username, score], (err) => {
         if (err) return res.status(500).json({ error: 'Database error' });
         res.json({ message: 'Score saved' });
     });
