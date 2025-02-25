@@ -1,18 +1,15 @@
 const express = require('express');
-const mysql = require('mysql2'); 
+const mysql = require('mysql2');
 const cors = require('cors');
-const path = require('path');  
+const path = require('path');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-
-// ✅ Serve static files from the default project folder
 app.use(express.static(__dirname));
 
-// ✅ Serve index.html for the root route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'web.html')); // ✅ Serve index.html from project root
+    res.sendFile(path.join(__dirname, 'web.html'));
 });
 
 // ✅ Database Connection
@@ -31,21 +28,29 @@ db.connect(err => {
     console.log("✅ Connected to MySQL database");
 });
 
-// ✅ Save Score
+// ✅ Save Score for Game1 or Game2
 app.post('/save-score', (req, res) => {
-    const { username, score } = req.body;
-    if (!username || score === undefined) {
+    const { username, score, game } = req.body;
+    if (!username || score === undefined || !game) {
         return res.status(400).json({ error: 'Invalid data' });
     }
-    db.query('INSERT INTO Gen1_scores (username, score) VALUES (?, ?)', [username, score], (err) => {
+
+    let table = game === "game1" ? "game1_scores" : "game2_scores";
+
+    db.query(`INSERT INTO ${table} (username, score) VALUES (?, ?)`, [username, score], (err) => {
         if (err) return res.status(500).json({ error: 'Database error' });
         res.json({ message: 'Score saved' });
     });
 });
 
-// ✅ Get Leaderboard
+// ✅ Get Leaderboard for Game1 or Game2
 app.get('/leaderboard', (req, res) => {
-    db.query('SELECT username, score FROM Gen1_scores ORDER BY score DESC LIMIT 10', (err, results) => {
+    const { game } = req.query;
+    if (!game) return res.status(400).json({ error: 'Game not specified' });
+
+    let table = game === "game1" ? "game1_scores" : "game2_scores";
+
+    db.query(`SELECT username, score FROM ${table} ORDER BY score DESC LIMIT 10`, (err, results) => {
         if (err) return res.status(500).json({ error: 'Database error' });
         res.json(results);
     });
