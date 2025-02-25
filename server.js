@@ -45,7 +45,7 @@ app.post('/save-score', (req, res) => {
 
 // ✅ Get Leaderboard
 app.get('/leaderboard', (req, res) => {
-    db.query('SELECT username, score FROM scores ORDER BY score DESC LIMIT 10', (err, results) => {
+    db.query('SELECT username, score FROM Gen1_scores ORDER BY score DESC LIMIT 10', (err, results) => {
         if (err) return res.status(500).json({ error: 'Database error' });
         res.json(results);
     });
