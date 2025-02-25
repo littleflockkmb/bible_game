@@ -332,26 +332,24 @@ button{
         function nextQuestion() {
             currentQuestion++;
             loadQuestion();
-        }
-
-        function saveScore(username, score) {
+        }function saveScore(username, score) {
     fetch('http://your-server-ip:10000/save-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, score, game: "game1" })
+        body: JSON.stringify({ username, score, game: "game1" }) // ✅ Send correct game name
     })
     .then(response => response.json())
     .then(data => console.log(data))
     .catch(error => console.error('Error:', error));
 }
 
-
+// ✅ Fetch and Display Leaderboard for game.html
 function loadLeaderboard() {
     fetch('http://your-server-ip:10000/leaderboard?game=game1')
         .then(response => response.json())
         .then(data => {
             const leaderboardBody = document.getElementById('leaderboard-body');
-            leaderboardBody.innerHTML = "";
+            leaderboardBody.innerHTML = ""; 
             data.forEach((entry, index) => {
                 const row = `<tr><td>${index + 1}</td><td>${entry.username}</td><td>${entry.score}</td></tr>`;
                 leaderboardBody.innerHTML += row;
@@ -360,7 +358,8 @@ function loadLeaderboard() {
         .catch(error => console.error('Error:', error));
 }
 
-
-        window.onload = loadLeaderboard;    </script>
+// ✅ Load leaderboard when the page loads
+window.onload = loadLeaderboard;
+   </script>
 </body>
 </html>
