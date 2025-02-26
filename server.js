@@ -45,14 +45,15 @@ app.get('/leaderboard', (req, res) => {
 
     let table = game === "game1" ? "Gen1_scores" : "Gen2_scores";
 
-    db.query(`SELECT username, score FROM ${table} ORDER BY score DESC LIMIT 10`, (err, results) => {
-        if (err) {
-            console.error("❌ Database Fetch Error:", err);
-            return res.status(500).json({ error: 'Database error' });
-        }
-        console.log("✅ Leaderboard Data:", results);
-        res.json(results);
-    });
+    db.query(`INSERT INTO ${table} (username, score) VALUES (?, ?)`, [username, score], (err) => {
+    if (err) {
+        console.error("❌ Database Insert Error:", err);
+        return res.status(500).json({ error: 'Database error' });
+    }
+    console.log(`✅ Score saved: ${username} - ${score} in ${table}`);
+    res.json({ message: 'Score saved' });
+});
+
 });
 
 
