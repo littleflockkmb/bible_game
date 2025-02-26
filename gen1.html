@@ -290,48 +290,159 @@ button{
 
             loadQuestion();
         }
+// Load sound effects
+const tickSound = new Audio("tick.mp3"); // 10-sec ticking sound
+const correctSound = new Audio("correct.mp3"); // Correct answer bell
+const wrongSound = new Audio("wrong.mp3"); // Wrong answer horn
+const winSound = new Audio("win.mp3"); // 🎉 Win sound when quiz ends
 
-        function loadQuestion() {
-            if (currentQuestion >= shuffledVerses.length) {
-                document.getElementById("game-container").innerHTML = `<h2>Congratulations! ${username} .<br> You Scored ${score} / ${shuffledVerses.length} .</h2>`;
-                saveScore();
-                return;
-            }
+let timeLeft; // Store timer value
+let timerInterval; // Store timer interval
 
-            const q = shuffledVerses[currentQuestion];
-            document.getElementById("verse-display").textContent = q.verse;
-            const choicesContainer = document.getElementById("choices-container");
-            choicesContainer.innerHTML = "";
+function loadQuestion() {
+    if (currentQuestion >= shuffledVerses.length) {
+        showFinalMessage();
+        return;
+    }
 
-            q.choices.forEach(choice => {
-                let button = document.createElement("button");
-                button.className = "choice";
-                button.textContent = choice;
-                button.onclick = () => checkAnswer(button, q.correct);
-                choicesContainer.appendChild(button);
-            });
+    answered = false; // ✅ Reset answered state
+    document.getElementById("next-button").disabled = false; // ✅ Enable "Next" button immediately
 
-            document.getElementById("result").textContent = "";
+    tickSound.pause();
+    tickSound.currentTime = 0;
+    tickSound.play();
+
+    timeLeft = 10;
+    document.getElementById("result").innerHTML = `⏳ Time Left: <b>${timeLeft}</b> seconds`;
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("result").innerHTML = `⏳ Time Left: <b>${timeLeft}</b> seconds`;
+
+        if (timeLeft === 0) {
+            clearInterval(timerInterval);
+            document.getElementById("result").innerHTML = "⏳ Time's up! ❌";
+            disableChoices();
         }
+    }, 1000);
 
-        function checkAnswer(button, correctAnswer) {
-            if (button.textContent === correctAnswer) {
-                score++;
-                button.style.backgroundColor = "green";
-            } else {
-                button.style.backgroundColor = "red";
-            }
+    const q = shuffledVerses[currentQuestion];
+    document.getElementById("verse-display").textContent = q.verse;
+    const choicesContainer = document.getElementById("choices-container");
+    choicesContainer.innerHTML = ""; // ✅ Clear old choices
 
-            // Disable all choices after answering
-            let choices = document.querySelectorAll(".choice");
-            choices.forEach(btn => btn.onclick = null);
+    q.choices.forEach(choice => {
+        let button = document.createElement("button");
+        button.className = "choice";
+        button.textContent = choice;
+        button.onclick = function() { checkAnswer(this, q.correct); };
+        choicesContainer.appendChild(button);
+    });
 
-            document.getElementById("result").textContent = "சரியான விடை: " + correctAnswer;
+    document.getElementById("result").textContent = "";
+}
+
+
+
+// Disable choices when time is up
+function disableChoices() {
+    let choices = document.querySelectorAll(".choice");
+    choices.forEach(btn => {
+        btn.disabled = true; // Disable buttons
+        btn.style.opacity = "0.6"; // Show disabled state
+    });
+
+    tickSound.pause();
+}
+
+function checkAnswer(button, correctAnswer) {
+    if (answered) return; // ✅ Prevent multiple clicks
+
+    answered = true; // ✅ Mark question as answered
+    clearInterval(timerInterval);
+    tickSound.pause();
+
+    let choices = document.querySelectorAll(".choice");
+
+    if (button.textContent === correctAnswer) {
+        score++;
+        button.style.backgroundColor = "green"; // ✅ Highlight correct answer
+        correctSound.play();
+    } else {
+        button.style.backgroundColor = "red"; // ❌ Highlight wrong answer
+        wrongSound.play();
+    }
+
+    // ✅ Disable all buttons, but keep correct answer visible
+    choices.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+        if (btn.textContent === correctAnswer) {
+            btn.style.backgroundColor = "green"; // ✅ Highlight correct answer
+            btn.style.color = "white"; // Improve visibility
         }
+    });
 
-        function nextQuestion() {
-            currentQuestion++;
-            loadQuestion();
+    document.getElementById("result").innerHTML = `✅ Correct Answer: <b>${correctAnswer}</b>`;
+    // ✅ Enable "Next" button
+}
+
+
+function nextQuestion() {
+    answered = false; // ✅ Reset answered state
+    currentQuestion++; // ✅ Move to next question
+
+    if (currentQuestion >= shuffledVerses.length) {
+        showFinalMessage(); // ✅ Show final message when quiz is complete
+    } else {
+        loadQuestion(); // ✅ Load the next question
+    }
+}
+
+
+
+
+function showFinalMessage() {
+    // Stop all sounds before playing win sound
+    tickSound.pause();
+    correctSound.pause();
+    wrongSound.pause();
+
+    // Play win sound 🎉
+    winSound.play();
+
+    // Show final message with Restart button
+    document.getElementById("game-container").innerHTML = `
+        <h2>🎉 Congratulations, ${username}! 🎉</h2>
+        <h3>You Scored: <b>${score} / ${shuffledVerses.length}</b></h3>
+        <button onclick="restartGame()">🔄 Play Again</button>
+        <button onclick="goToHomePage()">🏠 Go to Home</button>
+    `;
+
+    saveScore();
+}
+
+function restartGame() {
+    currentQuestion = 0;
+    score = 0;
+
+    // Reset the game container
+    document.getElementById("game-container").innerHTML = `
+        <h2 id="greeting">Welcome back, <b>${username}</b>!</h2>
+        <p id="verse-display"></p>
+        <div id="choices-container"></div>
+        <p id="result"></p>
+        <button id="next-button" onclick="nextQuestion()">Next</button>
+    `;
+
+    loadQuestion(); // Restart game from first question
+}
+
+
+function goToHomePage() {
+    window.location.href = "index.html"; // Change this to your home page URL
+}
         }function saveScore(username, score) {
     fetch('https://bible-game.onrender.com/save-score', {
         method: 'POST',
