@@ -404,13 +404,17 @@ function nextQuestion() {
 
 
 function showFinalMessage() {
-    // Stop all sounds before playing win sound
-    tickSound.pause();
-    correctSound.pause();
-    wrongSound.pause();
-
-    // Play win sound 🎉
     winSound.play();
+    document.getElementById("game-container").innerHTML = `
+        <h2>🎉 Congratulations, ${username}! 🎉</h2>
+        <h3>You Scored: <b>${score} / ${shuffledVerses.length}</b></h3>
+        <button onclick="restartGame()">🔄 Play Again</button>
+        <button onclick="goToHomePage()">🏠 Go to Home</button>
+    `;
+
+    saveScore(username, score); // ✅ Save score when the game ends
+}
+
 
     // Show final message with Restart button
     document.getElementById("game-container").innerHTML = `
