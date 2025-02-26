@@ -450,7 +450,7 @@ function goToHomePage() {
     fetch('https://bible-game.onrender.com/save-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, score, game: "game1" })
+        body: JSON.stringify({ username, score, game: "game2" })
     })
     .then(response => response.json())
     .then(data => console.log(data))
@@ -458,8 +458,7 @@ function goToHomePage() {
 }
 
 
-function loadLeaderboard() {
-    fetch('https://bible-game.onrender.com/leaderboard?game=game1')
+    fetch('https://bible-game.onrender.com/leaderboard?game=game2')
         .then(response => response.json())
         .then(data => {
             const leaderboardBody = document.getElementById('leaderboard-body');
@@ -470,9 +469,6 @@ function loadLeaderboard() {
             });
         })
         .catch(error => console.error('Error:', error));
-}
-
-
-        window.onload = loadLeaderboard;    </script>
+</script>
 </body>
 </html>
