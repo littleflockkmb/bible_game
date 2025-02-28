@@ -9,24 +9,29 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(__dirname));
 
-const db = mysql.createConnection({
-    host: process.env.DB_HOST || 'sql206.infinityfree.com', // ✅ Use environment variables
+// ✅ Use a connection pool (prevents "closed state" error)
+const pool = mysql.createPool({
+    connectionLimit: 10, // ✅ Allows multiple connections
+    host: process.env.DB_HOST || 'sql206.infinityfree.com',
     user: process.env.DB_USER || 'if0_38415521',
     password: process.env.DB_PASS || 'X1n0cRaCgl',
     database: process.env.DB_NAME || 'if0_38415521_littleflockdb',
-    port: process.env.DB_PORT || 3306
+    port: process.env.DB_PORT || 3306,
+    waitForConnections: true,
+    queueLimit: 0
 });
 
-// ✅ Properly handle database connection errors
-db.connect(err => {
+// ✅ Check database connection
+pool.getConnection((err, connection) => {
     if (err) {
         console.error("❌ Database connection failed:", err);
-        return;
+    } else {
+        console.log("✅ Connected to MySQL database");
+        connection.release(); // ✅ Release the connection back to the pool
     }
-    console.log("✅ Connected to MySQL database on port 3306");
 });
 
-
+// ✅ Save Score for Game1 and Game2 Separately
 app.post('/save-score', (req, res) => {
     const { username, score, game } = req.body;
     if (!username || score === undefined || !game) {
@@ -35,7 +40,7 @@ app.post('/save-score', (req, res) => {
 
     let table = game === "game1" ? "game1_scores" : "game2_scores";
 
-    db.query(`INSERT INTO ${table} (username, score) VALUES (?, ?)`, [username, score], (err) => {
+    pool.query(`INSERT INTO ${table} (username, score) VALUES (?, ?)`, [username, score], (err) => {
         if (err) {
             console.error("❌ Database Insert Error:", err);
             return res.status(500).json({ error: 'Database error' });
@@ -45,15 +50,14 @@ app.post('/save-score', (req, res) => {
     });
 });
 
-
-// ✅ Fetch Leaderboard for Each Game Separately (Fixed)
+// ✅ Fetch Leaderboard for Each Game Separately
 app.get('/leaderboard', (req, res) => {
     const { game } = req.query;
     if (!game) return res.status(400).json({ error: 'Game not specified' });
 
     let table = game === "game1" ? "game1_scores" : "game2_scores";
 
-    db.query(`SELECT username, score FROM ${table} ORDER BY score DESC LIMIT 10`, (err, results) => {
+    pool.query(`SELECT username, score FROM ${table} ORDER BY score DESC LIMIT 10`, (err, results) => {
         if (err) {
             console.error("❌ Database Fetch Error:", err);
             return res.status(500).json({ error: 'Database error' });
