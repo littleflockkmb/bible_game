@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const path = require('path');
+require('dotenv').config(); // ✅ Load environment variables
 
 const app = express();
 app.use(express.json());
@@ -9,13 +10,14 @@ app.use(cors());
 app.use(express.static(__dirname));
 
 const db = mysql.createConnection({
-    host: 'sql206.infinityfree.com', 
-    user: 'if0_38415521', 
-    password: 'X1n0cRaCgl', 
-    database: 'if0_38415521_littleflockdb',
-    port: 3306 // ✅ Change MySQL port to 3306
+    host: process.env.DB_HOST || 'sql206.infinityfree.com', // ✅ Use environment variables
+    user: process.env.DB_USER || 'if0_38415521',
+    password: process.env.DB_PASS || 'X1n0cRaCgl',
+    database: process.env.DB_NAME || 'if0_38415521_littleflockdb',
+    port: process.env.DB_PORT || 3306
 });
 
+// ✅ Properly handle database connection errors
 db.connect(err => {
     if (err) {
         console.error("❌ Database connection failed:", err);
@@ -24,7 +26,7 @@ db.connect(err => {
     console.log("✅ Connected to MySQL database on port 3306");
 });
 
-// ✅ Save Score for Game1 and Game2 Separately
+
 app.post('/save-score', (req, res) => {
     const { username, score, game } = req.body;
     if (!username || score === undefined || !game) {
@@ -42,6 +44,7 @@ app.post('/save-score', (req, res) => {
         res.json({ message: 'Score saved' });
     });
 });
+
 
 // ✅ Fetch Leaderboard for Each Game Separately (Fixed)
 app.get('/leaderboard', (req, res) => {
