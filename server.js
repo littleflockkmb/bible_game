@@ -9,10 +9,11 @@ app.use(cors());
 app.use(express.static(__dirname));
 
 const db = mysql.createConnection({
-    host: 'sql12.freesqldatabase.com', 
-    user: 'sql12763765', 
-    password: '@LITTLEflock-123', 
-    database: 'sql12763765'
+    host: 'sql206.infinityfree.com', 
+    user: 'if0_38415521', 
+    password: 'X1n0cRaCgl', 
+    database: 'if0_38415521_littleflockdb',
+    port: 3306 // ✅ Change MySQL port to 3306
 });
 
 db.connect(err => {
@@ -20,7 +21,7 @@ db.connect(err => {
         console.error("❌ Database connection failed:", err);
         return;
     }
-    console.log("✅ Connected to MySQL database");
+    console.log("✅ Connected to MySQL database on port 3306");
 });
 
 // ✅ Save Score for Game1 and Game2 Separately
@@ -30,32 +31,33 @@ app.post('/save-score', (req, res) => {
         return res.status(400).json({ error: 'Invalid data' });
     }
 
-    let table = game === "game1" ? "Gen1_scores" : "Gen2_scores";
+    let table = game === "game1" ? "game1_scores" : "game2_scores";
 
     db.query(`INSERT INTO ${table} (username, score) VALUES (?, ?)`, [username, score], (err) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
+        if (err) {
+            console.error("❌ Database Insert Error:", err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        console.log(`✅ Score saved: ${username} - ${score} in ${table}`);
         res.json({ message: 'Score saved' });
     });
 });
 
-// ✅ Fetch Leaderboard for Each Game Separately
+// ✅ Fetch Leaderboard for Each Game Separately (Fixed)
 app.get('/leaderboard', (req, res) => {
     const { game } = req.query;
     if (!game) return res.status(400).json({ error: 'Game not specified' });
 
-    let table = game === "game1" ? "Gen1_scores" : "Gen2_scores";
+    let table = game === "game1" ? "game1_scores" : "game2_scores";
 
-    db.query(`INSERT INTO ${table} (username, score) VALUES (?, ?)`, [username, score], (err) => {
-    if (err) {
-        console.error("❌ Database Insert Error:", err);
-        return res.status(500).json({ error: 'Database error' });
-    }
-    console.log(`✅ Score saved: ${username} - ${score} in ${table}`);
-    res.json({ message: 'Score saved' });
+    db.query(`SELECT username, score FROM ${table} ORDER BY score DESC LIMIT 10`, (err, results) => {
+        if (err) {
+            console.error("❌ Database Fetch Error:", err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        res.json(results);
+    });
 });
-
-});
-
 
 // ✅ Start Server
 const PORT = process.env.PORT || 10000;
