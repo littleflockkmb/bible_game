@@ -104,6 +104,7 @@ button{
     </style>
 </head>
 <body>
+    <!--Timer on with this audio-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <div class="lfpf">
         <a href="web.html"><h1 class="mt-2">LITTLE FLOCK PRAYER FELLOWSHIP</h1></a>
@@ -111,14 +112,14 @@ button{
     
     <nav class="topnav">
         <ul class="list-inline">
-            <li class="list-inline-item"><a href="web.html#daily-verse">Today Verse</a></li>
-            <li class="list-inline-item"><a href="index.html">Bible Verse Game</a></li>
-            <li class="list-inline-item"><a href="web.html#prayer-request">Prayer Request</a></li>
-            <li class="list-inline-item"><a href="web.html#about">About Us</a></li>
+            <li class="list-inline-item"><a href="index.html#daily-verse">Today Verse</a></li>
+            <li class="list-inline-item"><a href="game.html">Bible Verse Game</a></li>
+            <li class="list-inline-item"><a href="index.html#prayer-request">Prayer Request</a></li>
+            <li class="list-inline-item"><a href="index.html#about">About Us</a></li>
         </ul>
     </nav>
     <div id="gamehead"class="mt-3 mb-3">
-        <h1>BIBLE VERSE QUIZ</h1>
+        <h1>BIBLE VERSE GAME</h1>
     <p>Test and Improve your Bible Knowledge With Us.</p>
     </div>
     
@@ -137,7 +138,8 @@ button{
         <p id="verse-display"></p>
         <div id="choices-container"></div>
         <p id="result"></p>
-        <button onclick="nextQuestion()">Next</button>
+        <button id="next-button" onclick="nextQuestion()">Next</button>
+
         <p id="score-display"></p>
     </div>
 
@@ -155,8 +157,7 @@ button{
             <tbody id="leaderboard-body"></tbody>
         </table>
     </div>
-</section>
-
+</section> 
 
     <footer id="copy">
         <div>
@@ -168,7 +169,7 @@ button{
     <script>
         const bibleVerses = [
             { verse: "ஆதியிலே தேவன் வானத்தையும் பூமியையும் _________________. ஆதியாகமம் 1:1", 
-            choices: ["உண்டாக்கினார்", "படைத்தார்", "சிருஷ்டித்தார்"], correct: "சிருஷ்டித்தார்" },
+        choices: ["உண்டாக்கினார்", "படைத்தார்", "சிருஷ்டித்தார்"], correct: "சிருஷ்டித்தார்" },
 
             { verse: "தேவன் ______________ உண்டாகக்கடவது என்றார். ______________ உண்டாயிற்று. ஆதியாகமம் 1:3", 
             choices: ["ஒளி", "வெளிச்சம்", "பிரகாசம்"], correct: "வெளிச்சம்" },
@@ -272,7 +273,6 @@ button{
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
-
         function startGame() {
             username = document.getElementById("username").value;
             if (!username.trim()) {
@@ -290,55 +290,167 @@ button{
 
             loadQuestion();
         }
+// Load sound effects
+const tickSound = new Audio("tick.mp3"); // 10-sec ticking sound
+const correctSound = new Audio("correct.mp3"); // Correct answer bell
+const wrongSound = new Audio("wrong.mp3"); // Wrong answer horn
+const winSound = new Audio("win.mp3"); // 🎉 Win sound when quiz ends
 
-        function loadQuestion() {
-            if (currentQuestion >= shuffledVerses.length) {
-                document.getElementById("game-container").innerHTML = `<h2>Congratulations! ${username} .<br> You Scored ${score} / ${shuffledVerses.length} .</h2>`;
-                saveScore();
-                return;
-            }
+let timeLeft; // Store timer value
+let timerInterval; // Store timer interval
 
-            const q = shuffledVerses[currentQuestion];
-            document.getElementById("verse-display").textContent = q.verse;
-            const choicesContainer = document.getElementById("choices-container");
-            choicesContainer.innerHTML = "";
+function loadQuestion() {
+    if (currentQuestion >= shuffledVerses.length) {
+        showFinalMessage();
+        return;
+    }
 
-            q.choices.forEach(choice => {
-                let button = document.createElement("button");
-                button.className = "choice";
-                button.textContent = choice;
-                button.onclick = () => checkAnswer(button, q.correct);
-                choicesContainer.appendChild(button);
-            });
+    answered = false; // ✅ Reset answered state
+    document.getElementById("next-button").disabled = false; // ✅ Enable "Next" button immediately
 
-            document.getElementById("result").textContent = "";
+    tickSound.pause();
+    tickSound.currentTime = 0;
+    tickSound.play();
+
+    timeLeft = 20;
+    document.getElementById("result").innerHTML = `⏳ Time Left: <b>${timeLeft}</b> seconds`;
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("result").innerHTML = `⏳ Time Left: <b>${timeLeft}</b> seconds`;
+
+        if (timeLeft === 0) {
+            clearInterval(timerInterval);
+            document.getElementById("result").innerHTML = "⏳ Time's up! ❌";
+            disableChoices();
         }
+    }, 1000);
 
-        function checkAnswer(button, correctAnswer) {
-            if (button.textContent === correctAnswer) {
-                score++;
-                button.style.backgroundColor = "green";
-            } else {
-                button.style.backgroundColor = "red";
-            }
+    const q = shuffledVerses[currentQuestion];
+    document.getElementById("verse-display").textContent = q.verse;
+    const choicesContainer = document.getElementById("choices-container");
+    choicesContainer.innerHTML = ""; // ✅ Clear old choices
 
-            // Disable all choices after answering
-            let choices = document.querySelectorAll(".choice");
-            choices.forEach(btn => btn.onclick = null);
+    q.choices.forEach(choice => {
+        let button = document.createElement("button");
+        button.className = "choice";
+        button.textContent = choice;
+        button.onclick = function() { checkAnswer(this, q.correct); };
+        choicesContainer.appendChild(button);
+    });
 
-            document.getElementById("result").textContent = "சரியான விடை: " + correctAnswer;
+    document.getElementById("result").textContent = "";
+}
+
+
+
+// Disable choices when time is up
+function disableChoices() {
+    let choices = document.querySelectorAll(".choice");
+    choices.forEach(btn => {
+        btn.disabled = true; // Disable buttons
+        btn.style.opacity = "0.6"; // Show disabled state
+    });
+
+    tickSound.pause();
+}
+
+function checkAnswer(button, correctAnswer) {
+    if (answered) return; // ✅ Prevent multiple clicks
+
+    answered = true; // ✅ Mark question as answered
+    clearInterval(timerInterval);
+    tickSound.pause();
+
+    let choices = document.querySelectorAll(".choice");
+
+    if (button.textContent === correctAnswer) {
+        score++;
+        button.style.backgroundColor = "green"; // ✅ Highlight correct answer
+        correctSound.play();
+    } else {
+        button.style.backgroundColor = "red"; // ❌ Highlight wrong answer
+        wrongSound.play();
+    }
+
+    // ✅ Disable all buttons, but keep correct answer visible
+    choices.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+        if (btn.textContent === correctAnswer) {
+            btn.style.backgroundColor = "green"; // ✅ Highlight correct answer
+            btn.style.color = "white"; // Improve visibility
         }
+    });
 
-        function nextQuestion() {
-            currentQuestion++;
-            loadQuestion();
-        }
+    document.getElementById("result").innerHTML = `✅ Correct Answer: <b>${correctAnswer}</b>`;
+    // ✅ Enable "Next" button
+}
 
-        function saveScore(username, score) {
-    fetch('https://bible-game.onrender.com/save-score', {
+
+function nextQuestion() {
+    answered = false; // ✅ Reset answered state
+    currentQuestion++; // ✅ Move to next question
+
+    if (currentQuestion >= shuffledVerses.length) {
+        showFinalMessage(); // ✅ Show final message when quiz is complete
+    } else {
+        loadQuestion(); // ✅ Load the next question
+    }
+}
+
+
+
+
+function showFinalMessage() {
+    // Stop all sounds before playing win sound
+    tickSound.pause();
+    correctSound.pause();
+    wrongSound.pause();
+
+    // Play win sound 🎉
+    winSound.play();
+
+    // Show final message with Restart button
+    document.getElementById("game-container").innerHTML = `
+        <h2>🎉 Congratulations, ${username}! 🎉</h2>
+        <h3>You Scored: <b>${score} / ${shuffledVerses.length}</b></h3>
+        <button onclick="restartGame()">🔄 Play Again</button>
+        <button onclick="goToHomePage()">🏠 Go to Home</button>
+    `;
+
+    saveScore();
+}
+
+function restartGame() {
+    currentQuestion = 0;
+    score = 0;
+
+    // Reset the game container
+    document.getElementById("game-container").innerHTML = `
+        <h2 id="greeting">Welcome back, <b>${username}</b>!</h2>
+        <p id="verse-display"></p>
+        <div id="choices-container"></div>
+        <p id="result"></p>
+        <button id="next-button" onclick="nextQuestion()">Next</button>
+    `;
+
+    loadQuestion(); // Restart game from first question
+}
+
+
+function goToHomePage() {
+    window.location.href = "index.html"; // Change this to your home page URL
+}
+
+
+
+      function saveScore(username, score) {
+    fetch('https://bible-game.onrender.com/gen1.html/save-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, score, game: "game2" })
+        body: JSON.stringify({ username, score, game: "game1" })
     })
     .then(response => response.json())
     .then(data => console.log(data))
@@ -347,7 +459,7 @@ button{
 
 
 function loadLeaderboard() {
-    fetch('https://bible-game.onrender.com/leaderboard?game=game2')
+    fetch('https://bible-game.onrender.com/gen1.html/leaderboard?game=game1')
         .then(response => response.json())
         .then(data => {
             const leaderboardBody = document.getElementById('leaderboard-body');
@@ -361,6 +473,8 @@ function loadLeaderboard() {
 }
 
 
-        window.onload = loadLeaderboard;    </script>
+        window.onload = loadLeaderboard;    
+ </script>
 </body>
-</html>
+    </html>
+    
