@@ -1,14 +1,13 @@
-// Get the current date element
-const currentDateElement = document.getElementById('current-date');
-
 // Get the current date
 const currentDate = new Date();
 
 // Format the current date
 const formattedDate = currentDate.toLocaleDateString();
 
-// Update the current date element with the formatted date
-currentDateElement.querySelector('#date').textContent = formattedDate
+// Update multiple elements with the formatted date
+document.querySelectorAll('[id^="date-"]').forEach((element) => {
+  element.textContent = formattedDate;
+});
 //date script end--------------------------------------
 
     //verse code end.....
