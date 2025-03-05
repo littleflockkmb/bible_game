@@ -8,7 +8,7 @@ const currentDate = new Date();
 const formattedDate = currentDate.toLocaleDateString();
 
 // Update the current date element with the formatted date
-currentDateElement.querySelector('#date').textContent = formattedDate;
+currentDateElement.querySelector('#date').textContent = formattedDate
 //date script end--------------------------------------
 
     //verse code end.....
